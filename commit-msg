@@ -1,0 +1,51 @@
+#! /usr/bin/env elixir
+
+defmodule Hook do
+  def start do
+    # [_hook_file, commit_msg_file_path] = System.argv()
+
+    # IO.puts("Test print function")
+    # IO.puts(commit_msg_file_path)
+
+    # _commit_text = File.read!(commit_msg_file_path)
+
+    compile()
+    format()
+    is_formatted()
+    are_tests_passing?()
+    has_at_least_test_coverage()
+
+    exit(0)
+  end
+
+  def format do
+    System.cmd("mix", ["format"])
+  end
+
+  def is_formatted do
+    case System.cmd("mix", ["format", "--check-formatted"]) do
+      {_, 0} ->
+        true
+
+      {_, 1} ->
+        IO.puts("Your project is not correctly formatted, use 'mix format'")
+        exit(1)
+    end
+  end
+
+  def compile do
+    {tests_passing, result} = System.cmd("mix", ["compile"])
+    IO.puts("#{inspect(tests_passing)} | #{inspect(result)}")
+  end
+
+  def are_tests_passing? do
+    {tests_passing, result} = System.cmd("mix", ["test"])
+    IO.puts("#{inspect(tests_passing)} | #{inspect(result)}")
+  end
+
+  def has_at_least_test_coverage do
+    {tests_passing, result} = System.cmd("mix", ["test", "--cover"])
+  end
+end
+
+Hook.start()
