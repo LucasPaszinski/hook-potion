@@ -2,20 +2,11 @@
 
 defmodule Hook do
   def start do
-    # [_hook_file, commit_msg_file_path] = System.argv()
-
-    # IO.puts("Test print function")
-    # IO.puts(commit_msg_file_path)
-
-    # _commit_text = File.read!(commit_msg_file_path)
-
-    compile()
+    compile_without_warning()
     format()
     is_formatted()
     are_tests_passing?()
-    has_at_least_test_coverage()
-
-    exit(0)
+    # has_at_least_test_coverage()
   end
 
   def format do
@@ -25,27 +16,52 @@ defmodule Hook do
   def is_formatted do
     case System.cmd("mix", ["format", "--check-formatted"]) do
       {_, 0} ->
-        true
+        IO.puts("🟢 Your project is correctly formatted")
 
       {_, 1} ->
-        IO.puts("Your project is not correctly formatted, use 'mix format'")
+        IO.puts("🔴 Your project is not correctly formatted, use 'mix format' and check with 'mix format --check-formatted'")
         exit(1)
     end
   end
 
-  def compile do
+  def compile_without_warning do
     {tests_passing, result} = System.cmd("mix", ["compile"])
-    IO.puts("#{inspect(tests_passing)} | #{inspect(result)}")
+
+    case result do
+      0 ->
+        nil
+
+      1 ->
+        IO.puts("🔴 Your project did not compile. Run 'mix compile'")
+        exit(1)
+    end
+
+    case String.contains?(tests_passing, "warning") do
+      true ->
+        IO.puts("🔴 Your project contain warnings check then. Run 'mix compile --force'")
+        exit(1)
+
+      false ->
+        IO.puts("🟢 Your project compiled successfully")
+    end
   end
 
   def are_tests_passing? do
-    {tests_passing, result} = System.cmd("mix", ["test"])
-    IO.puts("#{inspect(tests_passing)} | #{inspect(result)}")
+    case System.cmd("mix", ["test"]) do
+      {_, 0} ->
+        IO.puts("🟢 Tests passed")
+        true
+
+      {_, 1} ->
+        IO.puts("🔴 Tests are not passings. Run 'mix test'")
+        exit(1)
+    end
   end
 
-  def has_at_least_test_coverage do
-    {tests_passing, result} = System.cmd("mix", ["test", "--cover"])
-  end
+  # def has_at_least_test_coverage do
+  #   {tests_passing, result} = System.cmd("mix", ["test", "--cover"])
+  #   IO.puts(tests_passing)
+  # end
 end
 
 Hook.start()
