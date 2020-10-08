@@ -3,7 +3,7 @@
 defmodule Hook do
   def start do
     compile_without_warning()
-    format()
+    # format()
     is_formatted()
     are_tests_passing?()
     # has_at_least_test_coverage()

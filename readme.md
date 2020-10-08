@@ -12,3 +12,10 @@
 * Error should be throw and you should not be able to commit.
 
 ## 🎉🎉🎉🎉 Thats It Enjoy !  🎉🎉🎉🎉
+
+
+
+# Hook Potion in action 🧪
+
+<img src="./assets_readme/commit-hook-all.gif">
+
